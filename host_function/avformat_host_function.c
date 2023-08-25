@@ -3,8 +3,7 @@
 #include <libavformat/avformat.h>
 #include <wasmedge/wasmedge.h>
 
-WasmEdge_Result fetch_video_resolution(void *Data, WasmEdge_MemoryInstanceContext *MemCxt,
-					const WasmEdge_Value *In, WasmEdge_Value *Out) {
+WasmEdge_Result fetch_video_resolution(void *Data, const WasmEdge_CallingFrameContext *FrameCxt, const WasmEdge_Value *In, WasmEdge_Value *Out) {
 	AVFormatContext *format_ctx = NULL;
 	const char * file_path = WasmEdge_ValueGetExternRef(In[0]);
 
@@ -24,7 +23,8 @@ WasmEdge_Result fetch_video_resolution(void *Data, WasmEdge_MemoryInstanceContex
 	if (video_stream_index == -1)
 		return WasmEdge_Result_Fail;  /*no video stream found in the given file*/
 
-	Out[0] = format_ctx-streams[video_stream_index]->codecpar->height;
+	WasmEdge_Value resolution = WasmEdge_ValueGenI32(format_ctx->streams[video_stream_index]->codecpar->height);
+	Out[0] = resolution;
 
 	avformat_close_input(&format_ctx);
 	
@@ -40,14 +40,14 @@ WasmEdge_ModuleInstanceContext* CreateModule (const struct WasmEdge_ModuleDescri
 	WasmEdge_FunctionTypeContext *FType;
 	WasmEdge_FunctionInstanceContext *FuncCxt;
 	enum WasmEdge_ValType ParamType[1] = {WasmEdge_ValType_ExternRef};
-	enum WasmEdge_ValType ReturType[1] = {WasmEdge_ValType_I32};
+	enum WasmEdge_ValType ReturnType[1] = {WasmEdge_ValType_I32};
 	
 	FType = WasmEdge_FunctionTypeCreate(ParamType, 1, ReturnType, 1);
 	FuncName = WasmEdge_StringCreateByCString("fetch_video_resolution");
 	FuncCxt = WasmEdge_FunctionInstanceCreate(FType, fetch_video_resolution, NULL, 0);
 	WasmEdge_ModuleInstanceAddFunction(Mod, FuncName, FuncCxt);
-	WasmEdge_stringDelete(FuncName);
-	WasmEdge_FunctionTypeDelete(Ftype);
+	WasmEdge_StringDelete(FuncName);
+	WasmEdge_FunctionTypeDelete(FType);
 	
 	return Mod;
 }

@@ -1,16 +1,30 @@
 # WasmEdge_ffmpeg_Plugin
-This repository contains the definition of a host function that is built into a wasmedge plugin for a few ffmpeg functions.
+## Overview
+This repository contains a WasmEdge plugin that exposes a host function for interacting with FFmpeg.
+The plugin is built as a shared library and can be dynamically loaded into WasmEdge.
 
-## Build
-This plugin will be built into a shared library(".so" in Linux), and it will be available as a loadable plugin for WasmEdge.
+## Prerequisites
+### Tools required
+* .Cmake
+* . gcc
 
-### Dependencies
-The build depends on these tools:
-```cmake```, ```gcc```
+### Libraries required
+* .WasmEdge('libwasmedge')
+* .ffmpeg('libavformat')
 
-It depends on the availability of these shared libraries:
-wasmedge: ```libwasmedge```
-ffmpeg: ```libavformat```
+## Building the plugin
+### Linux
+
+1. **Navigate to the host_function directory**
+
+```cd host_function```
+
+2. **Compile the host function into a shared library**
+
+```gcc -shared -o wasmedge_ffmpeg_plugin.so -fPIC avformat_host_function.c -lavformat -lwasmedge```
+
+This will generate a shared library named ```wasmedge_ffmpeg_plugin.so```
 
 ### Usage and Testing
-To test this functionality of this plugin, you need to have WasmEdge installed
+To test this functionality of this plugin, you need to have WasmEdge installed.
+The function will be called by a WasmEdge VM instance.
